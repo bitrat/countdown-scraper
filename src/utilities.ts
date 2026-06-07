@@ -1,5 +1,6 @@
 import { Product } from './typings';
 import { readFileSync } from 'fs';
+import { setTimeout } from 'timers/promises';
 
 // Set widths for table log output
 const tableIDWidth = 7
@@ -20,13 +21,57 @@ export const colour = {
   sky: '\x1b[38;5;153m',
 };
 
-// log()
-// -----
-// Console log with specified colour
+// delay()
+// ----------
+// Delay execution for a specified number of milliseconds
 
-export function log(colour: string, text: string) {
+export async function delay(ms: number): Promise<void> {
+  await setTimeout(ms);
+}
+
+// withRetry()
+// ----------
+// Retry an async function with a maximum number of attempts and delay between retries
+
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: { maxRetries: number; delay: number; label?: string }
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= options.maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.maxRetries) {
+        if (options.label) {
+          logWarn(`${options.label} failed, retry ${attempt}/${options.maxRetries} in ${options.delay}ms..`);
+        }
+        await delay(options.delay);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+// log()
+// ----------
+// Shorthand function for logging with custom colour
+
+export function log(text: string, logColour?: string) {
   const clear = '\x1b[0m';
-  console.log(`${colour}%s${clear}`, text);
+  const colourToUse = logColour ?? colour.white;
+  console.log(`${colourToUse}%s${clear}`, text);
+}
+
+// logWarn()
+// ----------
+// Shorthand function for logging with yellow colour
+
+export function logWarn(text: string) {
+  log(text, colour.yellow);
 }
 
 // logError()
@@ -34,7 +79,7 @@ export function log(colour: string, text: string) {
 // Shorthand function for logging with red colour
 
 export function logError(text: string) {
-  log(colour.red, text);
+  log(text, colour.red)
 }
 
 // logProductRow()
@@ -42,14 +87,14 @@ export function logError(text: string) {
 // Log a single product in one row, using alternating colours for readability.
 
 export function logProductRow(product: Product) {
-  const unitPriceString = product.unitPrice ? `$${product.unitPrice.toFixed(2)} /${product.unitName}` : ``;
+  const unitPriceString = product.unitPrice ? `$${product.unitPrice}` : ``;
   log(
-    getAlternatingRowColour(colour.sky, colour.white),
     `${product.id.padStart(tableIDWidth)} | ` +
     `${product.name.slice(0, tableNameWidth).padEnd(tableNameWidth)} | ` +
     `${product.size?.slice(0, tableSizeWidth).padEnd(tableSizeWidth)} | ` +
     `$ ${product.currentPrice.toFixed(2).padStart(4).padEnd(5)} | ` +
-    unitPriceString
+    unitPriceString,
+    getAlternatingRowColour(colour.sky, colour.white)
   );
 }
 
@@ -57,8 +102,7 @@ export function logProductRow(product: Product) {
 // ----------------
 
 export function logTableHeader() {
-  log(
-    colour.yellow,
+  logWarn(
     `${'ID'.padStart(tableIDWidth)} | ${'Name'.padEnd(tableNameWidth)} | ` +
     `${'Size'.padEnd(tableSizeWidth)} | ` +
     `${'Price'.padEnd(7)} | Unit Price`
@@ -68,8 +112,7 @@ export function logTableHeader() {
   for (let i = 0; i < 113; i++) {
     headerLine += "-"
   }
-  log(colour.yellow, headerLine);
-
+  logWarn(headerLine);
 }
 
 // getAlternatingRowColour()
@@ -120,92 +163,6 @@ export function getTimeElapsedSince(startTime: number): string {
     // Else print in 40s format
   } else return elapsedTimeString + "s";
 }
-
-// List of valid category names that scraped products should be put in
-export const validCategories: string[] = [
-  // freshCategory
-  'eggs',
-  'fruit',
-  'fresh-vegetables',
-  'salads-coleslaw',
-  'bread',
-  'bread-rolls',
-  'specialty-bread',
-  'bakery-cakes',
-  'bakery-desserts',
-  // chilledCategory
-  'milk',
-  'long-life-milk',
-  'sour-cream',
-  'cream',
-  'yoghurt',
-  'butter',
-  'cheese',
-  'cheese-slices',
-  'salami',
-  'other-deli-foods',
-  // meatCategory
-  'beef-lamb',
-  'chicken',
-  'ham',
-  'bacon',
-  'pork',
-  'patties-meatballs',
-  'sausages',
-  'deli-meats',
-  'meat-alternatives',
-  'seafood',
-  'salmon',
-  // frozenCategory
-  'ice-cream',
-  'ice-blocks',
-  'pastries-cheesecake',
-  'frozen-chips',
-  'frozen-vegetables',
-  'frozen-fruit',
-  'frozen-seafood',
-  'pies-sausage-rolls',
-  'pizza',
-  'other-savouries',
-  // pantryCategory
-  'rice',
-  'noodles',
-  'pasta',
-  'beans-spaghetti',
-  'canned-fish',
-  'canned-meat',
-  'soup',
-  'cereal',
-  'spreads',
-  'baking',
-  'sauces',
-  'oils-vinegars',
-  'world-foods',
-  // snacksCategory
-  'chocolate',
-  'boxed-chocolate',
-  'chips',
-  'crackers',
-  'biscuits',
-  'muesli-bars',
-  'nuts-bulk-mix',
-  'sweets-lollies',
-  'other-snacks',
-  // drinksCategory
-  'black-tea',
-  'green-tea',
-  'herbal-tea',
-  'drinking-chocolate',
-  'coffee',
-  'soft-drinks',
-  'energy-drinks',
-  'juice',
-  // petsCategory
-  'cat-food',
-  'cat-treats',
-  'dog-food',
-  'dog-treats',
-];
 
 // toTitleCase()
 // -------------

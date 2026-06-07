@@ -4,7 +4,7 @@
 
 /build
 
-.env.*
+.env
 
 npm-debug.log*
 
@@ -19,5 +19,3 @@ salt
 *.bat
 *.lnk
 *.ps1
-
-/images

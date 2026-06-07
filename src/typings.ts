@@ -3,35 +3,38 @@ export interface Product {
   name: string;
   size?: string;
   currentPrice: number;
-  lastUpdated: Date;
-  lastChecked: Date;
-  priceHistory: DatedPrice[];
-  sourceSite: string;
-  category: string[];
-  unitPrice?: number;
-  unitName?: string;
-  originalUnitQuantity?: number;
+  category: string;
+  unitPrice?: string;
 }
 
+export interface DBProduct {
+  id: string;
+  name: string;
+  size?: string;
+  lastChecked: string;
+  priceHistory: DatedPrice[];
+  sourceSite: string;
+  category: string;
+  unitPrice?: string;
+}
 export interface DatedPrice {
-  date: Date;
+  date: string;
   price: number;
 }
 
 export interface ProductResponse {
   upsertType: UpsertResponse;
-  product: Product;
+  dbProduct: DBProduct;
 }
-
-export interface CategorisedUrl {
-  url: string;
-  categories: string[];
-}
-
 export const enum UpsertResponse {
   NewProduct,
   PriceChanged,
-  InfoChanged,
   AlreadyUpToDate,
   Failed,
+}
+
+// Urls to scrape should have an associated category
+export interface CategorisedUrl {
+  url: string;
+  category: string;
 }
