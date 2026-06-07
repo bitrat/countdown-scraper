@@ -121,7 +121,6 @@ PG_DATABASE=woolworths_prices
 - `PG_USER` — either `postgres` (superuser) or the dedicated user you created in Step 3. (scraper_user)
 - `PG_PASSWORD` — the password for that user.
 - `PG_DATABASE` — the database name you created in Step 3 (`woolworths_prices`).
-- `IMAGE_UPLOAD_FUNC_URL` — leave blank unless you have an image upload endpoint configured.
 
 > **Note:** The database table (`products`) is created automatically the first time you run in database mode. You do not need to create it manually.
 
@@ -129,7 +128,7 @@ PG_DATABASE=woolworths_prices
 
 ## Step 7 — Run the Scraper
 
-There are two modes: **dry run** (no database) and **database mode**.
+There are three modes: **dry run** (no database), **save to csv** and **database mode**.
 
 ### Dry Run (no database required)
 
