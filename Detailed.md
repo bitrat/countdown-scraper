@@ -15,20 +15,25 @@ This scraper collects product prices from Woolworths NZ and stores them in a loc
 ## Step 1 — Install using nvm-windows
 
 Install nvm package manager:
+```
 winget install CoreyButler.NVMforWindows
-
+```
 Check version:
+```
 nvm version
+```
 
 powershell admin terminal - install versions of node.js and tell nvm which to use:
+```
 nvm install 22
 nvm use 22
 node -v
-
+```
 You can now install other versions of node and still use v22, or switch to the latest version
+```
 nvm install 24     # or whatever version you had before — now managed by nvm
 nvm use 22         # back to 22 for the scraper project
-
+```
 ---
 
 ## Step 2 — Install PostgreSQL
